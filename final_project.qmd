@@ -1,0 +1,122 @@
+---
+title: "Final Project"
+author: "Progga Chakravarty"
+format: html
+editor: visual
+---
+
+# Introduction
+
+In this project, I aim to analyze water quality data, especially emphasizing on how water temperature relates to other water quality indicators such as dissolved oxygen levels. Additionally I will explore whether whether water temperature varies significantly across different years.
+
+Question 1: What is the relationship between water temperature and dissolved oxygen levels?
+
+Question 2: Does water temperature vary significantly across different years?
+
+# Data Description
+
+This data set contains the following variables:
+
+-   Site_Id: Categorical Nominal
+-   Unit_Id: Categorical Nominal
+-   Read_Date: Date
+-   Salinity (ppt): Numerical Continuous
+-   Dissolved Oxygen (mg/L): Numerical Continuous
+-   pH (standard units): Numerical Continuous
+-   Secchi Depth (m): Numerical Continuous
+-   Water Depth (m): Numerical Continuous
+-   Water Temp (?C): Numerical Continuous
+-   Air Temp-Celsius: Numerical Continuous
+-   Air Temp (?F): Numerical Continuous
+-   Time (24:00): Categorical Nominal
+-   Field_Tech: Categorical Nominal
+-   DateVerified: Date
+-   WhoVerified: Categorical Nominal
+-   AirTemp (C): Numerical Continuous
+-   Year: Categorical Ordinal
+
+# Load and Read Data
+
+```{r}
+library(tidyverse)
+water_quality <- read_csv("Data/water_quality.csv")
+```
+
+# Inspect Data
+
+```{r}
+water_quality |>
+  glimpse()
+water_quality |>
+  summary()
+```
+
+# Histogram of Water Temperature Distribution
+
+```{r}
+water_quality |>
+  ggplot(aes(x = `Water Temp (?C)`)) +
+  geom_histogram(binwidth = 0.5) +
+  labs(title = "Distribution of Water Temperature", x = "Water Temp (°C)", y = "Frequency")
+```
+
+This histogram displays the distribution of water temperatures across all observations. Most values fall between 20 and 30 degree Celsius, where frequencies are highest. The data does not show a strong, definitive tail therefore it seems to be uniformly distributed, however with few high-value outliers.
+
+# Boxplot of Water Temperature by Year
+
+```{r}
+water_quality |>
+  ggplot(aes(x = factor(Year), y = `Water Temp (?C)`)) +
+  geom_boxplot(fill = "steelblue", color = "black") +
+  labs(title = "Boxplot of Water Temperature by Year", x = "Year", y = "Water Temp (°C)")
+```
+
+The boxplot shows the distributions of water temperature by year to identify whether there's meaningful variation over time. The median and spread of the boxes are relatively consistent year to year, with no clear trend or shift in patterns. Even with the presence of some outliers, the boxplot suggests the water temperature has not changed significantly over the years.
+
+# Scatterplot of Water Temp vs Dissolved Oxygen
+
+```{r}
+water_quality |>
+  ggplot(aes(x = `Water Temp (?C)`, y = `Dissolved Oxygen (mg/L)`)) +
+  geom_point(color = "steelblue") +
+  labs(title = "Water Temp vs. Dissolved Oxygen", x = "Water Temp (°C)", y = "Dissolved Oxygen (mg/L)")
+```
+
+The scatterplot explores the relationship between the two numerical variables: water temperature and dissolved oxygen levels. Based on the plot, it can be seen that as water temperature increases, the dissolved oxygen levels decrease. This suggests a negative correlation between the two variables and may imply that warmer water are linked to lower oxygen levels.
+
+# Summarize data of Water Temperature by Year
+
+```{r}
+water_quality |>
+  group_by(Year) |>
+  summarize(
+    mean_temp = mean(`Water Temp (?C)`, na.rm = TRUE),
+    sd_temp = sd(`Water Temp (?C)`, na.rm = TRUE),
+    min_temp = min(`Water Temp (?C)`, na.rm = TRUE),
+    max_temp = max(`Water Temp (?C)`, na.rm = TRUE)
+  )
+```
+
+# ANOVA test to compare water temperature across all years
+
+```{r}
+aov_result <- aov(`Water Temp (?C)` ~ Year, data = water_quality)
+```
+
+For the Inferential Statistics, I chose ANOVA test as it is ideal when comparing the means of more than two groups. In my case I am comparing water temperature across multiple years, hence ANOVA test can be used to showcase any significant difference across the years.
+
+# Display the summary of the ANOVA result
+
+```{r}
+summary(aov_result)
+```
+
+# Interpretation of ANOVA Results
+
+Based on the results of the ANOVA test, with a p-value (0.499) \> 0.05, we fail to reject the null hypothesis. This means that, based on the data, there isn't a strong evidence to suggest that water temperatures differ significantly between the years in the dataset. This idea is further supported by F-value of 0.457 showing variation between the years is relatively small compared to variation within the years.
+
+# Conclusion
+
+Through this project, I analyzed the relationship between water temperature and dissolved oxygen levels, as well as the variation of water temperature across different years. To do this I first explored the distribution of water temperature through a histogram, which showed that most observations fall between 20 degree celsius and 30 degree celsius, with a few extreme outliers. I created a boxplot to examine water temperature variations across different years, which showed relatively similar spread of values each year, with few outliers. Additionally, I conducted a scatterplot analysis to visualize the relationship between water temperature and dissolved oxygen, observing that dissolved oxygen levels tend to decrease slightly as water temperature increases, answering my first question on the relation between water temperature and dissolved oxygen levels. 
+
+For the inferential statistics part, I used ANOVA to test if there were significant differences in water temperatures across different years. The results of the ANOVA test showed that the p-value was 0.499, which is greater than the typical significance threshold of 0.05. This indicates that there is no statistically significant difference in water temperatures across the years in the dataset. Based on this, I concluded that water temperature does not vary significantly between the years examined, answering my second question on does water temperature significantly vary across years. Overall, the analysis provides insights into the distribution of water temperature and its relationship with other variables, however considering the limitations of the analysis (missing values, and outliers), a more in-depth investigation could reveal more trends and relationships.
